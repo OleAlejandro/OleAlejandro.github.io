@@ -41,15 +41,17 @@
                 const data = response.getDataTable();
                 let rowsHTML = '';
                 for (let i = 0; i < data.getNumberOfRows(); i++) {
-                    const navn = data.getValue(i, 0);
-                    const uke = data.getValue(i, 1);
-                    const total = data.getValue(i, 2);
-                    const gjeld = data.getValue(i, 3);
+                    const brukernavn = data.getValue(i, 0);
+                    const passord = data.getValue(i, 1);
+                    const navn = data.getValue(i, 2);
+                    const Løpt_denne_uka = data.getValue(i, 3);
+                    const total_løpt = data.getValue(i, 4);
+                    const gjeld = data.getValue(i, 5);
 
                     rowsHTML += `<tr>
                         <td>${navn}</td>
-                        <td>${uke}</td>
-                        <td>${total}</td>
+                        <td>${Løpt_denne_uka}</td>
+                        <td>${total_løpt}</td>
                         <td>${gjeld}</td>
                     </tr>`;
                 }
