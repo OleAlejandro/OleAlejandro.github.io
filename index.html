@@ -1,27 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Google Sheets via Visualization API</title>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>10KM &#128293;</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
 <body>
-    <h1>Brukere og løpestatus</h1>
-    <table id="brukerTabell" border="1">
-        <thead>
-            <tr>
-                <th>Navn</th>
-                <th>Løpt denne uken</th>
-                <th>Totalt løpt</th>
-                <th>Gjeld</th>
-            </tr>
-        </thead>
-        <tbody><tr><td colspan="4">Laster data...</td></tr></tbody>
-    </table>
+    <h1>10KM &#128293;</h1>
+
+    <div id="login">
+        <p>Bruker:</p>
+        <input type="text" id="username">
+        <p>Passord:</p>
+        <input type="password" id="password">
+        <br><br>
+        <button onclick="loggInn()">Logg inn</button>
+    </div>
+
+    <div id="Bruker" style="display: none;">
+        <!-- Personlig info -->
+        <div id="personlig-info">
+            <h2>Hei, <span id="navn"></span></h2>
+            <p>Du har denne uken løpt <span id="uke"></span> km av 10km</p>
+            <p>Det er <span id="countdown"></span> igjen av uka</p>
+            <p>Totalt har du løpt: <span id="total"></span> km</p>
+            <p>Siden du har vært en sofagris må det straffes, du skylder derfor: <span id="gjeld"></span> kr</p>
+        </div>
+    
+        <br>
+    
+        <!-- Km-registrering -->
+        <div id="registrering">
+            <p>Legg til km du har løpt:</p>
+            <input type="number" id="ny-km" min="0" step="0.1">
+            <button id="legg-til-btn">Registrer</button>
+        </div>
+    
+        <br><br>
+    
+        <!-- Tabell over andre brukere -->
+        <div id="alleBrukere">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Navn</th>
+                        <th>Løpt denne uken</th>
+                        <th>Totalt løpt</th>
+                        <th>Gjeld</th>
+                    </tr>
+                </thead>
+                <tbody id="brukerTabellInnhold">
+                    <!-- Rader blir lagt til med JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
         const sheetId = "1z5ZOzfCaP3TsQrRxU-e7NQ4Hl0OEQDL9rNTGMl-NRnk";
-        const sheetName = "Ark1";  // Endre hvis arknavnet er annerledes
+        const sheetName = "Ark1";
+        let brukere = [];
+
         google.charts.load('current', {'packages':['table']});
         google.charts.setOnLoadCallback(hentData);
 
@@ -30,33 +71,89 @@
             const query = new google.visualization.Query(
                 `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}&tq=${queryString}`
             );
-
             query.send(function(response) {
-                const tbody = document.querySelector('#brukerTabell tbody');
                 if (response.isError()) {
-                    tbody.innerHTML = `<tr><td colspan="4">Feil ved henting av data: ${response.getMessage()}</td></tr>`;
+                    alert("Feil ved henting av data: " + response.getMessage());
                     return;
                 }
-
                 const data = response.getDataTable();
-                let rowsHTML = '';
+                // Lagre data i array brukere: [brukernavn, passord, navn, løpt denne uken, totalt løpt, gjeld]
+                brukere = [];
                 for (let i = 0; i < data.getNumberOfRows(); i++) {
-                    const brukernavn = data.getValue(i, 0);
-                    const passord = data.getValue(i, 1);
-                    const navn = data.getValue(i, 2);
-                    const Løpt_denne_uka = data.getValue(i, 3);
-                    const total_løpt = data.getValue(i, 4);
-                    const gjeld = data.getValue(i, 5);
-
-                    rowsHTML += `<tr>
-                        <td>${navn}</td>
-                        <td>${Løpt_denne_uka}</td>
-                        <td>${total_løpt}</td>
-                        <td>${gjeld}</td>
-                    </tr>`;
+                    brukere.push([
+                        data.getValue(i, 0),
+                        data.getValue(i, 1),
+                        data.getValue(i, 2),
+                        data.getValue(i, 3),
+                        data.getValue(i, 4),
+                        data.getValue(i, 5)
+                    ]);
                 }
-                tbody.innerHTML = rowsHTML;
+                // Data er klar, vis innloggingsfelt etc.
+                document.getElementById("login").style.display = "block";
             });
+        }
+
+        function loggInn() {
+            const brukernavn = document.getElementById("username").value.trim();
+            const passord = document.getElementById("password").value.trim();
+
+            const bruker = brukere.find(b => b[0] === brukernavn && b[1] === passord);
+
+            if (bruker) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("Bruker").style.display = "block";
+                visBrukerdata(bruker);
+                visAlleUnntatt(brukernavn);
+            } else {
+                alert("Feil brukernavn eller passord");
+            }
+        }
+
+        function visBrukerdata(bruker) {
+            const navn = bruker[2];
+            const uke = bruker[3];
+            const total = bruker[4];
+            const gjeld = bruker[5];
+
+            const tid = nyNedtelling();
+
+            document.getElementById("personlig-info").innerHTML = `
+                <h2>Hei, ${navn}</h2>
+                <p>Du har denne uken løpt ${uke} km av 10km</p>
+                <p>Det er ${tid} igjen av uka</p>
+                <p>Totalt har du løpt: ${total} km</p>
+                <p>Siden du har vært en sofagris må det straffes, du skylder derfor: ${gjeld} kr</p>
+            `;
+        }
+
+        function visAlleUnntatt(innlogget) {
+            let html = `
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <tr><th>Brukernavn</th><th>Navn</th><th>Løpt denne uken</th><th>Totalt løpt</th><th>Gjeld</th></tr>
+            `;
+            brukere.forEach(r => {
+                if (r[0] !== innlogget) {
+                    html += `<tr><td>${r[0]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`;
+                }
+            });
+            html += "</table>";
+            document.getElementById("alleBrukere").innerHTML = html;
+        }
+
+        function nyNedtelling() {
+            const idag = new Date();
+            const slutt = new Date();
+            slutt.setDate(slutt.getDate() + (7 - slutt.getDay()));
+            slutt.setHours(23, 59, 59, 999);
+            const diff = slutt - idag;
+
+            const dager = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const timer = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const min = Math.floor((diff / (1000 * 60)) % 60);
+            const sek = Math.floor((diff / 1000) % 60);
+
+            return `${dager}d, ${timer}t:${min}m:${sek}s`;
         }
     </script>
 </body>
