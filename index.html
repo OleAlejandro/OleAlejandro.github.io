@@ -89,6 +89,8 @@
                         data.getValue(i, 5)
                     ]);
                 }
+                console.log("Brukere hentet fra Sheets:");
+                brukere.forEach(b => console.log(`Brukernavn: "${b[0]}", Passord: "${b[1]}"`));
                 // Data er klar, vis innloggingsfelt etc.
                 document.getElementById("login").style.display = "block";
             });
