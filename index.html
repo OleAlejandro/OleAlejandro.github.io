@@ -26,7 +26,7 @@
         google.charts.setOnLoadCallback(hentData);
 
         function hentData() {
-            const queryString = encodeURIComponent('SELECT A, B, C, D');
+            const queryString = encodeURIComponent('SELECT A, B, C, D, E, F');
             const query = new google.visualization.Query(
                 `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}&tq=${queryString}`
             );
