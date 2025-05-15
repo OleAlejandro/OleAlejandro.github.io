@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Google Sheets via Visualization API</title>
+</head>
+<body>
+    <h1>Brukere og løpestatus</h1>
+    <table id="brukerTabell" border="1">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Løpt denne uken</th>
+                <th>Totalt løpt</th>
+                <th>Gjeld</th>
+            </tr>
+        </thead>
+        <tbody><tr><td colspan="4">Laster data...</td></tr></tbody>
+    </table>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        const sheetId = "1z5ZOzfCaP3TsQrRxU-e7NQ4Hl0OEQDL9rNTGMl-NRnk";
+        const sheetName = "Ark1";  // Endre hvis arknavnet er annerledes
+        google.charts.load('current', {'packages':['table']});
+        google.charts.setOnLoadCallback(hentData);
+
+        function hentData() {
+            const queryString = encodeURIComponent('SELECT A, B, C, D');
+            const query = new google.visualization.Query(
+                `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}&tq=${queryString}`
+            );
+
+            query.send(function(response) {
+                const tbody = document.querySelector('#brukerTabell tbody');
+                if (response.isError()) {
+                    tbody.innerHTML = `<tr><td colspan="4">Feil ved henting av data: ${response.getMessage()}</td></tr>`;
+                    return;
+                }
+
+                const data = response.getDataTable();
+                let rowsHTML = '';
+                for (let i = 0; i < data.getNumberOfRows(); i++) {
+                    const navn = data.getValue(i, 0);
+                    const uke = data.getValue(i, 1);
+                    const total = data.getValue(i, 2);
+                    const gjeld = data.getValue(i, 3);
+
+                    rowsHTML += `<tr>
+                        <td>${navn}</td>
+                        <td>${uke}</td>
+                        <td>${total}</td>
+                        <td>${gjeld}</td>
+                    </tr>`;
+                }
+                tbody.innerHTML = rowsHTML;
+            });
+        }
+    </script>
+</body>
+</html>
