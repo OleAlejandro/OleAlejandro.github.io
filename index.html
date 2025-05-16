@@ -123,10 +123,15 @@
             document.getElementById("personlig-info").innerHTML = `
                 <h2>Hei, ${navn}</h2>
                 <p>Du har denne uken løpt ${uke} km av 10km</p>
-                <p>Det er ${tid} igjen av uka</p>
+                <p>Det er <span id="nedtelling-dynamisk"></span> igjen av uka</p>
                 <p>Totalt har du løpt: ${total} km</p>
                 <p>Siden du har vært en sofagris må det straffes, du skylder derfor: ${gjeld} kr</p>
             `;
+
+            // Start automatisk oppdatering av nedtellingen
+            setInterval(() => {
+                document.getElementById("nedtelling-dynamisk").textContent = nyNedtelling();
+            }, 1000);
         }
 
         function visAlleUnntatt(innlogget) {
@@ -149,14 +154,15 @@
             slutt.setDate(slutt.getDate() + (7 - slutt.getDay()));
             slutt.setHours(23, 59, 59, 999);
             const diff = slutt - idag;
-
+        
             const dager = Math.floor(diff / (1000 * 60 * 60 * 24));
             const timer = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const min = Math.floor((diff / (1000 * 60)) % 60);
             const sek = Math.floor((diff / 1000) % 60);
-
+        
             return `${dager}d, ${timer}t:${min}m:${sek}s`;
         }
+
     </script>
 </body>
 </html>
