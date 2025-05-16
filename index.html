@@ -140,9 +140,7 @@
                     <tr><th>Navn</th><th>Løpt denne uken</th><th>Totalt løpt</th><th>Gjeld</th></tr>
             `;
             brukere.forEach(r => {
-                if (r[0] !== innlogget) {
-                    html += `<tr><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`;
-                }
+                html += `<tr><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`;
             });
             html += "</table>";
             document.getElementById("alleBrukere").innerHTML = html;
